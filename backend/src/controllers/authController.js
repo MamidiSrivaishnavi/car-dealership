@@ -1,5 +1,5 @@
-const { registerUser } = require('../services/authService');
-const { validateRegistration } = require('../validators/authValidator');
+const { registerUser, loginUser } = require('../services/authService');
+const { validateRegistration, validateLogin } = require('../validators/authValidator');
 
 async function register(req, res) {
   const validationError = validateRegistration(req.body);
@@ -15,4 +15,18 @@ async function register(req, res) {
   }
 }
 
-module.exports = { register };
+async function login(req, res) {
+  const validationError = validateLogin(req.body);
+  if (validationError) {
+    return res.status(400).json({ error: validationError });
+  }
+
+  try {
+    const result = await loginUser(req.body);
+    return res.status(200).json(result);
+  } catch (err) {
+    return res.status(err.status || 500).json({ error: err.message });
+  }
+}
+
+module.exports = { register, login };

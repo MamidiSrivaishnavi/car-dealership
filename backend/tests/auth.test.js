@@ -88,3 +88,75 @@ describe('POST /api/auth/register', () => {
     expect(res.body.error).toMatch(/password/i);
   });
 });
+
+describe('POST /api/auth/login', () => {
+  beforeEach(async () => {
+    await request(app).post('/api/auth/register').send({
+      email: 'login@example.com',
+      password: 'password123',
+    });
+  });
+
+  it('returns 200 and a JWT token on successful login', async () => {
+    const res = await request(app).post('/api/auth/login').send({
+      email: 'login@example.com',
+      password: 'password123',
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('token');
+    expect(typeof res.body.token).toBe('string');
+  });
+
+  it('returned JWT contains the user id and role', async () => {
+    const res = await request(app).post('/api/auth/login').send({
+      email: 'login@example.com',
+      password: 'password123',
+    });
+
+    const payload = JSON.parse(
+      Buffer.from(res.body.token.split('.')[1], 'base64').toString()
+    );
+    expect(payload).toHaveProperty('id');
+    expect(payload).toHaveProperty('role');
+    expect(payload.role).toBe('USER');
+  });
+
+  it('returns 401 when email does not exist', async () => {
+    const res = await request(app).post('/api/auth/login').send({
+      email: 'nobody@example.com',
+      password: 'password123',
+    });
+
+    expect(res.status).toBe(401);
+    expect(res.body.error).toMatch(/invalid credentials/i);
+  });
+
+  it('returns 401 when password is incorrect', async () => {
+    const res = await request(app).post('/api/auth/login').send({
+      email: 'login@example.com',
+      password: 'wrongpassword',
+    });
+
+    expect(res.status).toBe(401);
+    expect(res.body.error).toMatch(/invalid credentials/i);
+  });
+
+  it('returns 400 when email is missing', async () => {
+    const res = await request(app).post('/api/auth/login').send({
+      password: 'password123',
+    });
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/email/i);
+  });
+
+  it('returns 400 when password is missing', async () => {
+    const res = await request(app).post('/api/auth/login').send({
+      email: 'login@example.com',
+    });
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/password/i);
+  });
+});

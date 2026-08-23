@@ -6,4 +6,10 @@ function validateRegistration({ email, password }) {
   return null;
 }
 
-module.exports = { validateRegistration };
+function validateLogin({ email, password }) {
+  if (!email) return 'Email is required';
+  if (!password) return 'Password is required';
+  return null;
+}
+
+module.exports = { validateRegistration, validateLogin };
