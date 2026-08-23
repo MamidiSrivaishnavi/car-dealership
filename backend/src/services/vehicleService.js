@@ -31,4 +31,14 @@ async function updateVehicle(id, data) {
   return prisma.vehicle.update({ where: { id }, data });
 }
 
-module.exports = { createVehicle, getAllVehicles, searchVehicles, updateVehicle };
+async function deleteVehicle(id) {
+  const existing = await prisma.vehicle.findUnique({ where: { id } });
+  if (!existing) {
+    const error = new Error('Vehicle not found');
+    error.status = 404;
+    throw error;
+  }
+  return prisma.vehicle.delete({ where: { id } });
+}
+
+module.exports = { createVehicle, getAllVehicles, searchVehicles, updateVehicle, deleteVehicle };

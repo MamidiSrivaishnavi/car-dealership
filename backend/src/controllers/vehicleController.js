@@ -1,4 +1,4 @@
-const { createVehicle, getAllVehicles, searchVehicles, updateVehicle } = require('../services/vehicleService');
+const { createVehicle, getAllVehicles, searchVehicles, updateVehicle, deleteVehicle } = require('../services/vehicleService');
 const { validateVehicle } = require('../validators/vehicleValidator');
 
 async function create(req, res) {
@@ -55,4 +55,14 @@ async function update(req, res) {
   }
 }
 
-module.exports = { create, list, search, update };
+async function remove(req, res) {
+  try {
+    const id = parseInt(req.params.id);
+    await deleteVehicle(id);
+    return res.status(200).json({ message: 'Vehicle deleted successfully' });
+  } catch (err) {
+    return res.status(err.status || 500).json({ error: err.message });
+  }
+}
+
+module.exports = { create, list, search, update, remove };

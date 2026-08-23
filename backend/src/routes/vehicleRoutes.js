@@ -1,5 +1,5 @@
 const express = require('express');
-const { create, list, search, update } = require('../controllers/vehicleController');
+const { create, list, search, update, remove } = require('../controllers/vehicleController');
 const authenticate = require('../middleware/authenticate');
 const authorize = require('../middleware/authorize');
 
@@ -9,5 +9,6 @@ router.post('/', authenticate, authorize('ADMIN'), create);
 router.get('/search', authenticate, search);
 router.get('/', authenticate, list);
 router.put('/:id', authenticate, authorize('ADMIN'), update);
+router.delete('/:id', authenticate, authorize('ADMIN'), remove);
 
 module.exports = router;

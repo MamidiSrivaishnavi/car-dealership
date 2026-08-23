@@ -184,6 +184,80 @@ describe('GET /api/vehicles', () => {
   });
 });
 
+describe('DELETE /api/vehicles/:id', () => {
+  let deleteVehicleId;
+  let otherVehicleId;
+
+  beforeEach(async () => {
+    await prisma.vehicle.deleteMany();
+    const v1 = await prisma.vehicle.create({
+      data: { make: 'Toyota', model: 'Camry', category: 'Sedan', price: 25000, quantity: 5, updatedAt: new Date() },
+    });
+    const v2 = await prisma.vehicle.create({
+      data: { make: 'Honda', model: 'Civic', category: 'Sedan', price: 22000, quantity: 3, updatedAt: new Date() },
+    });
+    deleteVehicleId = v1.id;
+    otherVehicleId = v2.id;
+  });
+
+  it('ADMIN can delete a vehicle and returns 200', async () => {
+    const res = await request(app)
+      .delete(`/api/vehicles/${deleteVehicleId}`)
+      .set('Authorization', `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.message).toMatch(/deleted/i);
+  });
+
+  it('deleted vehicle no longer exists in the database', async () => {
+    await request(app)
+      .delete(`/api/vehicles/${deleteVehicleId}`)
+      .set('Authorization', `Bearer ${adminToken}`);
+
+    const vehicleInDb = await prisma.vehicle.findUnique({ where: { id: deleteVehicleId } });
+    expect(vehicleInDb).toBeNull();
+  });
+
+  it('deleting one vehicle does not affect other vehicles', async () => {
+    await request(app)
+      .delete(`/api/vehicles/${deleteVehicleId}`)
+      .set('Authorization', `Bearer ${adminToken}`);
+
+    const res = await request(app)
+      .get('/api/vehicles')
+      .set('Authorization', `Bearer ${adminToken}`);
+
+    expect(res.body.vehicles).toHaveLength(1);
+    expect(res.body.vehicles[0].id).toBe(otherVehicleId);
+  });
+
+  it('returns 403 when USER tries to delete a vehicle', async () => {
+    const res = await request(app)
+      .delete(`/api/vehicles/${deleteVehicleId}`)
+      .set('Authorization', `Bearer ${userToken}`);
+
+    expect(res.status).toBe(403);
+    expect(res.body.error).toMatch(/forbidden/i);
+  });
+
+  it('returns 401 when no token is provided', async () => {
+    const res = await request(app)
+      .delete(`/api/vehicles/${deleteVehicleId}`);
+
+    expect(res.status).toBe(401);
+    expect(res.body.error).toMatch(/unauthorized/i);
+  });
+
+  it('returns 404 when vehicle does not exist', async () => {
+    const res = await request(app)
+      .delete('/api/vehicles/999999')
+      .set('Authorization', `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(404);
+    expect(res.body.error).toMatch(/not found/i);
+  });
+});
+
 describe('PUT /api/vehicles/:id', () => {
   const updatedData = {
     make: 'Honda',
