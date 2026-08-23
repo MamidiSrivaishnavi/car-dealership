@@ -382,18 +382,34 @@ The project is structured for straightforward deployment:
 > Production deployment has not been verified as part of this repository. The steps above reflect the project's current structure and configuration.
 
 ---
-
 ## Screenshots
 
-Screenshots have not been added to this repository yet. Suggested placeholders:
+### Home
+![Home](screenshots/home.png)
 
-| Page            | Description                                      |
-|-----------------|--------------------------------------------------|
-| Home            | Landing page with navigation                     |
-| Login           | Email/password login form                        |
-| Dashboard       | Vehicle inventory grid with search and purchase  |
-| My Purchases    | Purchase history table with price and date       |
-| Admin Panel     | Vehicle management form + inventory table        |
+### About Us
+![About Us](screenshots/about-us.png)
+
+### Login
+![Login](screenshots/log-in.png)
+
+### Sign In
+![Sign In](screenshots/sign-in.png)
+
+### User Dashboard
+![User Dashboard](screenshots/user-dashboard.png)
+
+### User Purchase History
+![User Purchase History](screenshots/user-purchase.png)
+
+### Admin Dashboard
+![Admin Dashboard](screenshots/admin-dashboard.png)
+
+### Admin Panel
+![Admin Panel](screenshots/admin-panel.png)
+
+### Admin Purchase View
+![Admin Purchase View](screenshots/admin-purchase.png)
 
 ---
 
@@ -418,6 +434,41 @@ The following are not currently implemented:
 - Password reset flow
 - Sales analytics / reporting dashboard
 - Multi-currency support
+
+---
+
+## My AI Usage
+
+### Tools Used
+
+- **Amazon Q Developer** (via Q CLI) — used throughout the debugging, documentation, and finalization phases of the project.
+- **ChatGPT** — used during earlier development phases including project planning, backend scaffolding, TDD setup, frontend development, and UI design.
+
+### How AI Was Used
+
+| Phase | AI Assistance |
+|---|---|
+| Project planning | Helped define the architecture, data models (User, Vehicle, Purchase), and API route structure |
+| Backend development | Assisted with Express.js route setup, Prisma schema design, controller/service separation, and middleware implementation |
+| Authentication | Guided JWT signing/verification, bcryptjs password hashing, and the authenticate/authorize middleware pattern |
+| TDD & testing | Helped write Jest + Supertest test cases covering auth, CRUD, search, purchase, restock, and purchase history; tests were written before or alongside implementation |
+| Vehicle CRUD | Assisted with create, update, delete, and list endpoints including validation and 403/404 error handling |
+| Search & filter | Helped implement dynamic Prisma `where` clause construction for make, model, category, and price range filtering |
+| Purchase flow | Assisted with the Prisma transaction that atomically decrements stock and creates a Purchase record |
+| Restock | Helped implement the admin-only restock endpoint with quantity validation |
+| Purchase history | Assisted with the `my-purchases` endpoint including user-scoped filtering and vehicle relation include |
+| Frontend development | Helped scaffold React pages, Axios interceptors, AuthContext, ProtectedRoute/AdminRoute guards, and the INR currency formatter |
+| Admin panel | Assisted with the AdminPage component including inline restock UI and form state management |
+| Debugging | Identified that the `20260823_add_purchase` migration had not been applied to `dev.db`, causing the "Failed to load purchase history" error; fixed by running `prisma migrate deploy` |
+| Documentation | Assisted with writing README.md, TEST_REPORT.md, and PROMPTS.md |
+
+### AI and TDD
+
+Tests were used to validate AI-generated backend code. Each feature (auth, CRUD, search, purchase, restock, purchase history) was verified against a dedicated test file before being considered complete. AI suggestions that failed tests were revised until all 70 tests passed.
+
+### Personal Reflection
+
+AI tools were used as a development accelerator, not a replacement for understanding. Every piece of AI-generated code was read, understood, and manually reviewed before being integrated. Where AI output was incorrect or incomplete — such as the missing database migration — the issue was diagnosed and fixed through inspection of the actual codebase rather than blindly re-prompting. The test suite served as the objective measure of correctness throughout the project.
 
 ---
 
