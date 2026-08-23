@@ -21,4 +21,14 @@ async function searchVehicles({ make, model, category, minPrice, maxPrice }) {
   return prisma.vehicle.findMany({ where });
 }
 
-module.exports = { createVehicle, getAllVehicles, searchVehicles };
+async function updateVehicle(id, data) {
+  const existing = await prisma.vehicle.findUnique({ where: { id } });
+  if (!existing) {
+    const error = new Error('Vehicle not found');
+    error.status = 404;
+    throw error;
+  }
+  return prisma.vehicle.update({ where: { id }, data });
+}
+
+module.exports = { createVehicle, getAllVehicles, searchVehicles, updateVehicle };
