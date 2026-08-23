@@ -4,4 +4,8 @@ async function createVehicle(data) {
   return prisma.vehicle.create({ data });
 }
 
-module.exports = { createVehicle };
+async function getAllVehicles() {
+  return prisma.vehicle.findMany();
+}
+
+module.exports = { createVehicle, getAllVehicles };

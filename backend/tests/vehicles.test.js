@@ -9,7 +9,6 @@ beforeAll(async () => {
   await prisma.user.deleteMany();
   await prisma.vehicle.deleteMany();
 
-  // Create admin user directly with known role
   const bcrypt = require('bcryptjs');
   const jwt = require('jsonwebtoken');
 
@@ -116,5 +115,76 @@ describe('POST /api/vehicles', () => {
 
     expect(res.status).toBe(400);
     expect(res.body.error).toMatch(/quantity/i);
+  });
+});
+
+describe('GET /api/vehicles', () => {
+  beforeEach(async () => {
+    await prisma.vehicle.deleteMany();
+  });
+
+  it('returns 401 when no token is provided', async () => {
+    const res = await request(app).get('/api/vehicles');
+
+    expect(res.status).toBe(401);
+    expect(res.body.error).toMatch(/unauthorized/i);
+  });
+
+  it('returns empty array when no vehicles exist', async () => {
+    const res = await request(app)
+      .get('/api/vehicles')
+      .set('Authorization', `Bearer ${userToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.vehicles).toEqual([]);
+  });
+
+  it('authenticated USER can list all vehicles', async () => {
+    await prisma.vehicle.createMany({
+      data: [
+        { make: 'Toyota', model: 'Camry', category: 'Sedan', price: 25000, quantity: 5, updatedAt: new Date() },
+        { make: 'Honda', model: 'Civic', category: 'Sedan', price: 22000, quantity: 3, updatedAt: new Date() },
+      ],
+    });
+
+    const res = await request(app)
+      .get('/api/vehicles')
+      .set('Authorization', `Bearer ${userToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.vehicles).toHaveLength(2);
+  });
+
+  it('authenticated ADMIN can list all vehicles', async () => {
+    await prisma.vehicle.createMany({
+      data: [
+        { make: 'Toyota', model: 'Camry', category: 'Sedan', price: 25000, quantity: 5, updatedAt: new Date() },
+      ],
+    });
+
+    const res = await request(app)
+      .get('/api/vehicles')
+      .set('Authorization', `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.vehicles).toHaveLength(1);
+  });
+
+  it('returned vehicles contain the required fields', async () => {
+    await prisma.vehicle.create({
+      data: { make: 'Toyota', model: 'Camry', category: 'Sedan', price: 25000, quantity: 5, updatedAt: new Date() },
+    });
+
+    const res = await request(app)
+      .get('/api/vehicles')
+      .set('Authorization', `Bearer ${userToken}`);
+
+    const vehicle = res.body.vehicles[0];
+    expect(vehicle).toHaveProperty('id');
+    expect(vehicle).toHaveProperty('make');
+    expect(vehicle).toHaveProperty('model');
+    expect(vehicle).toHaveProperty('category');
+    expect(vehicle).toHaveProperty('price');
+    expect(vehicle).toHaveProperty('quantity');
   });
 });

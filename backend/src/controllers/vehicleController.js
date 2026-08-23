@@ -1,4 +1,4 @@
-const { createVehicle } = require('../services/vehicleService');
+const { createVehicle, getAllVehicles } = require('../services/vehicleService');
 const { validateVehicle } = require('../validators/vehicleValidator');
 
 async function create(req, res) {
@@ -16,4 +16,13 @@ async function create(req, res) {
   }
 }
 
-module.exports = { create };
+async function list(req, res) {
+  try {
+    const vehicles = await getAllVehicles();
+    return res.status(200).json({ vehicles });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+}
+
+module.exports = { create, list };
