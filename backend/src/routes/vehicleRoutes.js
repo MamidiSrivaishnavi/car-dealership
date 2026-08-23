@@ -1,5 +1,5 @@
 const express = require('express');
-const { create, list, search, update, remove, purchase } = require('../controllers/vehicleController');
+const { create, list, search, update, remove, purchase, restock } = require('../controllers/vehicleController');
 const authenticate = require('../middleware/authenticate');
 const authorize = require('../middleware/authorize');
 
@@ -11,5 +11,6 @@ router.get('/', authenticate, list);
 router.put('/:id', authenticate, authorize('ADMIN'), update);
 router.delete('/:id', authenticate, authorize('ADMIN'), remove);
 router.post('/:id/purchase', authenticate, purchase);
+router.post('/:id/restock', authenticate, authorize('ADMIN'), restock);
 
 module.exports = router;

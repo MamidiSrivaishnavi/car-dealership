@@ -1,4 +1,4 @@
-const { createVehicle, getAllVehicles, searchVehicles, updateVehicle, deleteVehicle, purchaseVehicle } = require('../services/vehicleService');
+const { createVehicle, getAllVehicles, searchVehicles, updateVehicle, deleteVehicle, purchaseVehicle, restockVehicle } = require('../services/vehicleService');
 const { validateVehicle } = require('../validators/vehicleValidator');
 
 async function create(req, res) {
@@ -75,4 +75,17 @@ async function purchase(req, res) {
   }
 }
 
-module.exports = { create, list, search, update, remove, purchase };
+async function restock(req, res) {
+  const { quantity } = req.body;
+  if (quantity === undefined || quantity === null) return res.status(400).json({ error: 'Quantity is required' });
+  if (typeof quantity !== 'number' || quantity <= 0) return res.status(400).json({ error: 'Quantity must be a positive number' });
+  try {
+    const id = parseInt(req.params.id);
+    await restockVehicle(id, quantity);
+    return res.status(200).json({ message: 'Vehicle restocked successfully' });
+  } catch (err) {
+    return res.status(err.status || 500).json({ error: err.message });
+  }
+}
+
+module.exports = { create, list, search, update, remove, purchase, restock };

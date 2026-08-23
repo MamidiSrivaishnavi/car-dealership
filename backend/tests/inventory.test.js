@@ -117,3 +117,84 @@ describe('POST /api/vehicles/:id/purchase', () => {
     expect(vehicle.quantity).toBe(0);
   });
 });
+
+describe('POST /api/vehicles/:id/restock', () => {
+  let vehicleId;
+
+  beforeEach(async () => {
+    await prisma.vehicle.deleteMany();
+    const vehicle = await prisma.vehicle.create({
+      data: { make: 'Toyota', model: 'Camry', category: 'Sedan', price: 25000, quantity: 2, updatedAt: new Date() },
+    });
+    vehicleId = vehicle.id;
+  });
+
+  it('ADMIN can restock a vehicle and returns 200', async () => {
+    const res = await request(app)
+      .post(`/api/vehicles/${vehicleId}/restock`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ quantity: 10 });
+
+    expect(res.status).toBe(200);
+    expect(res.body.message).toMatch(/restocked/i);
+  });
+
+  it('restock increases stock by the specified quantity', async () => {
+    await request(app)
+      .post(`/api/vehicles/${vehicleId}/restock`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ quantity: 10 });
+
+    const vehicle = await prisma.vehicle.findUnique({ where: { id: vehicleId } });
+    expect(vehicle.quantity).toBe(12);
+  });
+
+  it('returns 403 when USER tries to restock', async () => {
+    const res = await request(app)
+      .post(`/api/vehicles/${vehicleId}/restock`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({ quantity: 10 });
+
+    expect(res.status).toBe(403);
+    expect(res.body.error).toMatch(/forbidden/i);
+  });
+
+  it('returns 401 when no token is provided', async () => {
+    const res = await request(app)
+      .post(`/api/vehicles/${vehicleId}/restock`)
+      .send({ quantity: 10 });
+
+    expect(res.status).toBe(401);
+    expect(res.body.error).toMatch(/unauthorized/i);
+  });
+
+  it('returns 404 when vehicle does not exist', async () => {
+    const res = await request(app)
+      .post('/api/vehicles/999999/restock')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ quantity: 10 });
+
+    expect(res.status).toBe(404);
+    expect(res.body.error).toMatch(/not found/i);
+  });
+
+  it('returns 400 when restock quantity is missing', async () => {
+    const res = await request(app)
+      .post(`/api/vehicles/${vehicleId}/restock`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({});
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/quantity/i);
+  });
+
+  it('returns 400 when restock quantity is zero or negative', async () => {
+    const res = await request(app)
+      .post(`/api/vehicles/${vehicleId}/restock`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ quantity: 0 });
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/quantity/i);
+  });
+});

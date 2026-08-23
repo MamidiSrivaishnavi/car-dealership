@@ -56,4 +56,14 @@ async function purchaseVehicle(id) {
   return prisma.vehicle.update({ where: { id }, data: { quantity: vehicle.quantity - 1 } });
 }
 
-module.exports = { createVehicle, getAllVehicles, searchVehicles, updateVehicle, deleteVehicle, purchaseVehicle };
+async function restockVehicle(id, quantity) {
+  const vehicle = await prisma.vehicle.findUnique({ where: { id } });
+  if (!vehicle) {
+    const error = new Error('Vehicle not found');
+    error.status = 404;
+    throw error;
+  }
+  return prisma.vehicle.update({ where: { id }, data: { quantity: vehicle.quantity + quantity } });
+}
+
+module.exports = { createVehicle, getAllVehicles, searchVehicles, updateVehicle, deleteVehicle, purchaseVehicle, restockVehicle };
