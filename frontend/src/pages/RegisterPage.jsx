@@ -6,15 +6,19 @@ export default function RegisterPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
+    setLoading(true);
     try {
       await authAPI.register(form);
       navigate('/login');
     } catch (err) {
       setError(err.response?.data?.error || 'Registration failed');
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -37,7 +41,7 @@ export default function RegisterPage() {
           onChange={(e) => setForm({ ...form, password: e.target.value })}
           required
         />
-        <button type="submit">Register</button>
+        <button type="submit" disabled={loading}>{loading ? 'Registering…' : 'Register'}</button>
       </form>
       <p>Already have an account? <Link to="/login">Login</Link></p>
     </div>

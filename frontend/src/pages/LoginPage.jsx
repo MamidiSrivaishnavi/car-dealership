@@ -8,19 +8,22 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
+    setLoading(true);
     try {
       const res = await authAPI.login(form);
       const { token } = res.data;
-      // Decode payload to get id and role
       const payload = JSON.parse(atob(token.split('.')[1]));
       login(token, { id: payload.id, role: payload.role });
       navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed');
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -43,7 +46,7 @@ export default function LoginPage() {
           onChange={(e) => setForm({ ...form, password: e.target.value })}
           required
         />
-        <button type="submit">Login</button>
+        <button type="submit" disabled={loading}>{loading ? 'Logging in…' : 'Login'}</button>
       </form>
       <p>No account? <Link to="/register">Register</Link></p>
     </div>
