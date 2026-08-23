@@ -1,4 +1,4 @@
-const { createVehicle, getAllVehicles } = require('../services/vehicleService');
+const { createVehicle, getAllVehicles, searchVehicles } = require('../services/vehicleService');
 const { validateVehicle } = require('../validators/vehicleValidator');
 
 async function create(req, res) {
@@ -25,4 +25,20 @@ async function list(req, res) {
   }
 }
 
-module.exports = { create, list };
+async function search(req, res) {
+  try {
+    const { make, model, category, minPrice, maxPrice } = req.query;
+    const vehicles = await searchVehicles({
+      make,
+      model,
+      category,
+      minPrice: minPrice !== undefined ? parseFloat(minPrice) : undefined,
+      maxPrice: maxPrice !== undefined ? parseFloat(maxPrice) : undefined,
+    });
+    return res.status(200).json({ vehicles });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+}
+
+module.exports = { create, list, search };
