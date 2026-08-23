@@ -25,6 +25,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  await prisma.purchase.deleteMany();
   await prisma.vehicle.deleteMany();
   await prisma.user.deleteMany();
   await prisma.$disconnect();
@@ -34,6 +35,7 @@ describe('POST /api/vehicles/:id/purchase', () => {
   let vehicleId;
 
   beforeEach(async () => {
+    await prisma.purchase.deleteMany();
     await prisma.vehicle.deleteMany();
     const vehicle = await prisma.vehicle.create({
       data: { make: 'Toyota', model: 'Camry', category: 'Sedan', price: 25000, quantity: 5, updatedAt: new Date() },
@@ -122,6 +124,7 @@ describe('POST /api/vehicles/:id/restock', () => {
   let vehicleId;
 
   beforeEach(async () => {
+    await prisma.purchase.deleteMany();
     await prisma.vehicle.deleteMany();
     const vehicle = await prisma.vehicle.create({
       data: { make: 'Toyota', model: 'Camry', category: 'Sedan', price: 25000, quantity: 2, updatedAt: new Date() },

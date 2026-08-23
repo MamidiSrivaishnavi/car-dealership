@@ -1,4 +1,4 @@
-const { createVehicle, getAllVehicles, searchVehicles, updateVehicle, deleteVehicle, purchaseVehicle, restockVehicle } = require('../services/vehicleService');
+const { createVehicle, getAllVehicles, searchVehicles, updateVehicle, deleteVehicle, purchaseVehicle, restockVehicle, getPurchaseHistory } = require('../services/vehicleService');
 const { validateVehicle } = require('../validators/vehicleValidator');
 
 async function create(req, res) {
@@ -68,10 +68,19 @@ async function remove(req, res) {
 async function purchase(req, res) {
   try {
     const id = parseInt(req.params.id);
-    await purchaseVehicle(id);
+    await purchaseVehicle(id, req.user.id);
     return res.status(200).json({ message: 'Vehicle purchased successfully' });
   } catch (err) {
     return res.status(err.status || 500).json({ error: err.message });
+  }
+}
+
+async function myPurchases(req, res) {
+  try {
+    const purchases = await getPurchaseHistory(req.user.id);
+    return res.status(200).json({ purchases });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
   }
 }
 
@@ -88,4 +97,4 @@ async function restock(req, res) {
   }
 }
 
-module.exports = { create, list, search, update, remove, purchase, restock };
+module.exports = { create, list, search, update, remove, purchase, restock, myPurchases };

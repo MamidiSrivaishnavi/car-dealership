@@ -36,4 +36,5 @@ export const vehiclesAPI = {
   remove: (id) => api.delete(`/vehicles/${id}`),
   purchase: (id) => api.post(`/vehicles/${id}/purchase`),
   restock: (id, quantity) => api.post(`/vehicles/${id}/restock`, { quantity }),
+  myPurchases: () => api.get('/vehicles/my-purchases'),
 };

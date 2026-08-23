@@ -28,27 +28,55 @@ export default function LoginPage() {
   }
 
   return (
-    <div>
-      <h1>Login</h1>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-          required
-        />
-        <button type="submit" disabled={loading}>{loading ? 'Logging in…' : 'Login'}</button>
-      </form>
-      <p>No account? <Link to="/register">Register</Link></p>
+    <div className="auth-page">
+      <div className="auth-hero">
+        <div className="auth-hero-logo">⬡ AutoElite</div>
+        <h1>Drive Your Dream Vehicle</h1>
+        <p>Access our exclusive inventory of premium vehicles. Sign in to browse, purchase, and manage your automotive experience.</p>
+        <div className="auth-hero-badge">
+          <span>✦</span> Trusted by thousands of customers
+        </div>
+      </div>
+
+      <div className="auth-form-side">
+        <div className="auth-card">
+          <h2>Welcome back</h2>
+          <p className="subtitle">Sign in to your account to continue</p>
+
+          {error && <div className="alert alert-error">⚠ {error}</div>}
+
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label>Email address</label>
+              <input
+                type="email"
+                placeholder="you@example.com"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Password</label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                required
+              />
+            </div>
+            <button type="submit" className="btn btn-primary btn-full" disabled={loading} style={{ marginTop: '.5rem' }}>
+              {loading ? <><span className="spinner" style={{ width: 14, height: 14 }} /> Signing in…</> : 'Sign In'}
+            </button>
+          </form>
+
+          <div className="divider" />
+          <p style={{ fontSize: '.88rem', color: 'var(--text-muted)', textAlign: 'center' }}>
+            No account? <Link to="/register">Create one</Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

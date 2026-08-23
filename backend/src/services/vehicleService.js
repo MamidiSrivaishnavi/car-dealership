@@ -41,7 +41,7 @@ async function deleteVehicle(id) {
   return prisma.vehicle.delete({ where: { id } });
 }
 
-async function purchaseVehicle(id) {
+async function purchaseVehicle(id, userId) {
   const vehicle = await prisma.vehicle.findUnique({ where: { id } });
   if (!vehicle) {
     const error = new Error('Vehicle not found');
@@ -53,7 +53,18 @@ async function purchaseVehicle(id) {
     error.status = 400;
     throw error;
   }
-  return prisma.vehicle.update({ where: { id }, data: { quantity: vehicle.quantity - 1 } });
+  return prisma.$transaction([
+    prisma.vehicle.update({ where: { id }, data: { quantity: vehicle.quantity - 1 } }),
+    prisma.purchase.create({ data: { userId, vehicleId: id, price: vehicle.price } }),
+  ]);
+}
+
+async function getPurchaseHistory(userId) {
+  return prisma.purchase.findMany({
+    where: { userId },
+    include: { vehicle: { select: { make: true, model: true, category: true } } },
+    orderBy: { createdAt: 'desc' },
+  });
 }
 
 async function restockVehicle(id, quantity) {
@@ -66,4 +77,4 @@ async function restockVehicle(id, quantity) {
   return prisma.vehicle.update({ where: { id }, data: { quantity: vehicle.quantity + quantity } });
 }
 
-module.exports = { createVehicle, getAllVehicles, searchVehicles, updateVehicle, deleteVehicle, purchaseVehicle, restockVehicle };
+module.exports = { createVehicle, getAllVehicles, searchVehicles, updateVehicle, deleteVehicle, purchaseVehicle, restockVehicle, getPurchaseHistory };
